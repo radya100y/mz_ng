@@ -357,5 +357,3 @@ select
     , parseDateTimeBestEffortOrZero(toString(ts_ms), 'UTC') as dt_load
 from stage.loyalty_bonus_cur
 order by ts_ms;
-
-select toStartOfInterval(now(), interval 3 hour)
