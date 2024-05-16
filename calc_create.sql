@@ -17,12 +17,21 @@ create table calc.ci
     , ch_id String
     , ci_id String
     , article_id String
+
+    , bonus_id Int64
+    , created_on Int64
+    , value Decimal32(2)
+    , is_status UInt8
+    , campaign_id Int32
+    , rule_id Int32
+
     , ts_ms UInt64
     , dt_stream DateTime materialized parseDateTimeBestEffortOrZero(toString(ts_ms), 'UTC')
 ) engine = ReplacingMergeTree(ts_ms)
 partition by toYYYYMM(dt_stream)
 order by (ci_instance_hash, key_instance_source_hash)
 primary key ci_instance_hash;
+
 
 
 
@@ -67,6 +76,7 @@ select
     , ts_ms
 from stage.loyalty_chequeitem_cur;*/
 
+insert into calc.ci(ci_instance_hash, key_instance_source_hash, instance_id, source_id, is_del, ch_id, ci_id, bonus_id, created_on, value, is_status, campaign_id, rule_id, operation_type_id, ts_ms)
 select
     cityHash64(ci_id, instance_id) as ci_instance_hash
     , cityHash64(bonus_id, instance_id, source_id) as key_source_instance_hash
@@ -82,9 +92,21 @@ select
     , toInt32OrZero(JSON_VALUE(ba, '$.campaign_id')) as campaign_id
     , toInt32OrZero(JSON_VALUE(ba, '$.rule_id')) as rule_id
     , JSON_VALUE(ba, '$.operation_type_id') as operation_type_id
+    , ts_ms
 from stage.loyalty_bonus_cur
 -- where ci_id <> 0;
 ;
+
+
+alter table calc.ci
+      add column bonus_id Int64         after article_id
+    , add column created_on Int64       after bonus_id
+    , add column value Decimal32(2)     after created_on
+    , add column is_status UInt8        after value
+    , add column campaign_id Int32      after is_status
+    , add column rule_id Int32          after campaign_id
+    , add column operation_type_id LowCardinality(String) after rule_id;
+
 
 -- {"bonus_id":14239306,"created_on":1714753378046,"value":0.0
 -- -- ,"discount":0.0,"start_date":1714753378046,"finish_date":32503680000000,"remainder":0.0
