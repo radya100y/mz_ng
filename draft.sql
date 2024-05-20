@@ -214,31 +214,31 @@ insert into draft.null_ci values (2, 1, 0, 1);
 insert into draft.null_ci values (1, 0, 1, 0);
 
 insert into draft.null_ch values (1, 0);
-
-insert into draft.null_bo values (11, 1, 1, 1000, 0);
 insert into draft.null_bo values (10, 2, 1, 100, 0);
+insert into draft.null_bo values (11, 1, 1, 1000, 0);
 insert into draft.null_bo values (11, 0, 0, 0, 1);
-insert into draft.null_bo values (13, 0, 1, 120, 0);
+insert into draft.null_bo values (14, 1, 1, 8, 0);
+
+insert into draft.null_bo values (15, 0, 1, 44, 0);
+
 
 insert into draft.null_ea values (110, 1, 1, 1000, 0);
 insert into draft.null_ea values (111, 0, 1, 222, 0);
 insert into draft.null_ea values (111, 0, 0, 0, 1);
+
+insert into draft.null_ea values (112, 0, 1, 88, 0);
+insert into draft.null_ea values (112, 0, 0, 0, 1);
 
 
 select *, dt_create from draft.stage where key_id in (select key_id from draft.keys);
 select * from draft.keys;
 
 
-select
-    tup.2 as ch
-    , groupArrayIf((tup.10, del), tup.1 = 'bh') as bh
-    , groupArrayIf((tup.12, del), tup.1 = 'eh') as eh
-    , groupArrayIf((tup.8, del), tup.1 = 'ci') as art
-    , groupArrayIf((tup.11, del), tup.1 = 'bi') as bi
-from
+with cte as
 (
     select
-        argMaxIf(tuple(* except (key_id)), dt_create, is_del = 0) as tup
+        key_id
+        , argMaxIf(tuple(* except (key_id)), dt_create, is_del = 0) as tup
         , argMax(is_del, dt_create) as del
     from draft.stage
     where key_id in
@@ -266,9 +266,45 @@ from
     group by key_id
     having tup.1 <> ''
     order by tup.1, del
-) group by tup.2;
+)
+-- select * from cte where ((tup.1 = 'ch') or (tup.1 in ('bh', 'eh') and del = 0));
+select
+    ch.ch as ch
+    , ci.ci
+    , ch.is_del ? ch.is_del : ci.is_del as del
+    , ch.dt
+    , ci.art
+    , ch.bh
+    , ci.bi
+    , ch.eh
+    , ci.ei
+from
+(
+    select
+        anyIf(tup.2, tup.1 = 'ci') as ch
+        , anyIf(del, tup.1 = 'ci') as is_del
+        , tup.3 as ci
+        , anyIf(tup.8, tup.1 = 'ci') as art
+        , groupArrayIf(tup.11, tup.1 = 'bi') as bi
+        , groupArrayIf(tup.13, tup.1 = 'ei') as ei
+    from cte
+    where ((tup.1 = 'ci') or (tup.1 in ('bi', 'ei') and del = 0))
+    group by tup.3
+) as ci
+semi left join
+(
+    select
+        tup.2 as ch
+        , anyIf(del, tup.1 = 'ch') as is_del
+        , anyIf(tup.9, tup.1 = 'ch') as dt
+        , groupArrayIf(tup.10, tup.1 = 'bh') as bh
+        , groupArrayIf(tup.12, tup.1 = 'eh') as eh
+    from cte
+    where ((tup.1 = 'ch') or (tup.1 in ('bh', 'eh') and del = 0))
+    group by tup.2
+) as ch on ch.ch = ci.ch
+;
 
-select * from draft.stage where key_id = 1871875760937111286
 
 
 
