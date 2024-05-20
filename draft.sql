@@ -264,10 +264,9 @@ with cte as
         )
     )
     group by key_id
-    having tup.1 <> ''
+    having ((tup.1 in ('ci', 'ch')) or (tup.1 in ('bi', 'bh', 'ei', 'eh') and del = 0))
     order by tup.1, del
 )
--- select * from cte where ((tup.1 = 'ch') or (tup.1 in ('bh', 'eh') and del = 0));
 select
     ch.ch as ch
     , ci.ci
@@ -288,7 +287,6 @@ from
         , groupArrayIf(tup.11, tup.1 = 'bi') as bi
         , groupArrayIf(tup.13, tup.1 = 'ei') as ei
     from cte
-    where ((tup.1 = 'ci') or (tup.1 in ('bi', 'ei') and del = 0))
     group by tup.3
 ) as ci
 semi left join
@@ -300,7 +298,6 @@ semi left join
         , groupArrayIf(tup.10, tup.1 = 'bh') as bh
         , groupArrayIf(tup.12, tup.1 = 'eh') as eh
     from cte
-    where ((tup.1 = 'ch') or (tup.1 in ('bh', 'eh') and del = 0))
     group by tup.2
 ) as ch on ch.ch = ci.ch
 ;
