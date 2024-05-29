@@ -178,30 +178,6 @@ services:
     entrypoint: /bin/sh
     tty: true
 
-#  provectus-ui:
-#    image: 'provectuslabs/kafka-ui:v0.7.2'
-#    hostname: 'provectus-ui'
-#    container_name: kafka_ui
-#    networks:
-#      - network
-#    ports:
-#      - '9991:8080'
-#    environment:
-#      # Authorization
-#      - AUTH_TYPE=LOGIN_FORM
-#      - SPRING_SECURITY_USER_NAME=admin
-#      - SPRING_SECURITY_USER_PASSWORD=123qwe
-#      # Cluster settings
-#      - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=broker1:9012,broker2:9022,broker3:9032
-#      - KAFKA_CLUSTERS_0_NAME=KAFKA-CDC
-#      # Others
-#      - TZ=Europe/Moscow
-#    restart: always
-#    depends_on:
-#      - broker1
-#      - broker2
-#      - broker3
-
 #  debezium:
 #    image: 'debezium/connect:2.6'
 #    hostname: 'debezium'
