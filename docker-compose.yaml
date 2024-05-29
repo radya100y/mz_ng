@@ -1,0 +1,261 @@
+version: '3.9'
+
+volumes:
+  data1:
+    driver: local
+  data2:
+    driver: local
+  data3:
+    driver: local
+  binaries1:
+    driver: local
+  binaries2:
+    driver: local
+  binaries3:
+    driver: local
+  debezium_config:
+    driver: local
+  debezium_logs:
+    driver: local
+  debezium_data:
+    driver: local
+
+networks:
+  network:
+    driver: bridge
+
+services:
+  broker1:
+    image: 'bitnami/kafka:3.7.0'
+    hostname: 'broker1'
+    container_name: kafka_broker1
+    networks:
+      - network
+    ports:
+      - '9014:9014'
+      - '9015:9015'
+      - '9016:9016'
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_BROKER_ID=1
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9014,CONTROLLER://:9015,PLAINTEXT_KSQL://:9016
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9014,PLAINTEXT_KSQL://broker1:9016
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_KSQL:PLAINTEXT
+
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@broker1:9015,2@broker2:9025,3@broker3:9035
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_KRAFT_CLUSTER_ID=L1ZEQh1yTbGhNNUE7-6wSW
+
+      # Others
+      - TZ=Europe/Moscow
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:3
+      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS:0
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR:1
+#      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    volumes:
+      - data1:/bitnami/kafka
+      - binaries1:/opt/bitnami/kafka/bin
+    restart: always
+
+  broker2:
+    image: 'bitnami/kafka:3.7.0'
+    hostname: 'broker2'
+    container_name: kafka_broker2
+    networks:
+      - network
+    ports:
+      - '9024:9024'
+      - '9025:9025'
+      - '9026:9026'
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_BROKER_ID=2
+      - KAFKA_CFG_NODE_ID=2
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9024,CONTROLLER://:9025,PLAINTEXT_KSQL://:9026
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9024,PLAINTEXT_KSQL://broker2:9026
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_KSQL:PLAINTEXT
+
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@broker1:9015,2@broker2:9025,3@broker3:9035
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_KRAFT_CLUSTER_ID=L1ZEQh1yTbGhNNUE7-6wSW
+      # Others
+      - TZ=Europe/Moscow
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:3
+      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS:0
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR:1
+    volumes:
+      - data2:/bitnami/kafka
+      - binaries2:/opt/bitnami/kafka/bin
+    restart: always
+
+  broker3:
+    image: 'bitnami/kafka:3.7.0'
+    hostname: 'broker3'
+    container_name: kafka_broker3
+    networks:
+      - network
+    ports:
+      - '9034:9034'
+      - '9035:9035'
+      - '9036:9036'
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_BROKER_ID=3
+      - KAFKA_CFG_NODE_ID=3
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9034,CONTROLLER://:9035,PLAINTEXT_KSQL://:9036
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9034,PLAINTEXT_KSQL://broker3:9036
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_KSQL:PLAINTEXT
+
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@broker1:9015,2@broker2:9025,3@broker3:9035
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_KRAFT_CLUSTER_ID=L1ZEQh1yTbGhNNUE7-6wSW
+      # Others
+      - TZ=Europe/Moscow
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:3
+      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS:0
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR:1
+    volumes:
+      - data3:/bitnami/kafka
+      - binaries3:/opt/bitnami/kafka/bin
+    restart: always
+
+#  clickhouse:
+#    image: bitnami/clickhouse:latest
+#    container_name: clickhouse
+#    environment:
+#      - ALLOW_EMPTY_PASSWORD=yes
+#      - CLICKHOUSE_ADMIN_USER=default
+#      - CLICKHOUSE_ADMIN_PASSWORD=123qwe
+#      - CLICKHOUSE_HTTP_PORT=8123
+#    networks:
+#      - network
+#    ports:
+#      - '8123:8123'
+#    volumes:
+#      - /Users/radya100/DataGripProjects/NG_CDP/config.xml:/bitnami/clickhouse/etc/conf.d/config.xml:ro
+#      - /Users/radya100/DataGripProjects/NG_CDP/users.xml:/bitnami/clickhouse/etc/conf.d/users.xml:ro
+#    depends_on:
+#      - broker1
+#      - broker2
+#      - broker3
+
+  ksqldb-server:
+    image: confluentinc/ksqldb-server:0.29.0
+    hostname: ksqldb-server
+    container_name: ksqldb-server
+    ports:
+      - "8088:8088"
+    environment:
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_BOOTSTRAP_SERVERS: broker1:9016,broker2:9026,broker3:9036
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+    networks:
+      - network
+    depends_on:
+      - broker1
+      - broker2
+      - broker3
+
+  ksqldb-cli:
+    image: confluentinc/ksqldb-cli:0.29.0
+    container_name: ksqldb-cli
+    networks:
+      - network
+    depends_on:
+      - ksqldb-server
+    entrypoint: /bin/sh
+    tty: true
+
+#  provectus-ui:
+#    image: 'provectuslabs/kafka-ui:v0.7.2'
+#    hostname: 'provectus-ui'
+#    container_name: kafka_ui
+#    networks:
+#      - network
+#    ports:
+#      - '9991:8080'
+#    environment:
+#      # Authorization
+#      - AUTH_TYPE=LOGIN_FORM
+#      - SPRING_SECURITY_USER_NAME=admin
+#      - SPRING_SECURITY_USER_PASSWORD=123qwe
+#      # Cluster settings
+#      - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=broker1:9012,broker2:9022,broker3:9032
+#      - KAFKA_CLUSTERS_0_NAME=KAFKA-CDC
+#      # Others
+#      - TZ=Europe/Moscow
+#    restart: always
+#    depends_on:
+#      - broker1
+#      - broker2
+#      - broker3
+
+#  debezium:
+#    image: 'debezium/connect:2.6'
+#    hostname: 'debezium'
+#    container_name: kafka_debezium
+#    ports:
+#      - 8083:8083
+#    networks:
+#      - network
+#    environment:
+#      - GROUP_ID=1
+#      - CONFIG_STORAGE_TOPIC=connect_configs
+#      - OFFSET_STORAGE_TOPIC=connect_offsets
+#      - STATUS_STORAGE_TOPIC=connect_statuses
+#      - KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+#      - VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+#      - CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE=false
+#      - CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE=false
+#      - CONNECT_DECIMAL_FORMAT=BASE64
+#      - BOOTSTRAP_SERVERS=broker1:9012,broker2:9022,broker3:9032
+#      - TZ=Europe/Moscow
+#    volumes:
+#      - debezium_config:/kafka/config
+#      - debezium_logs:/kafka/logs
+#      - debezium_data:/kafka/data
+#    restart: always
+#    depends_on:
+#      - broker1
+#      - broker2
+#      - broker3
+
+#  debezium-ui:
+#    image: 'debezium/debezium-ui:2.5'
+#    hostname: 'debezium-ui'
+#    container_name: kafka_debezium_ui
+#    networks:
+#      - network
+#    ports:
+#      - 9992:8080
+#    environment:
+#      - KAFKA_CONNECT_URIS=http://debezium:8083
+#      - TZ=Europe/Moscow
+#    restart: always
+#    depends_on:
+#      - debezium
+
+#  exporter:
+#    image: 'redpandadata/kminion:v2.2.8'
+#    hostname: 'exporter'
+#    container_name: kafka_exporter
+#    networks:
+#      - network
+#    ports:
+#      - '9996:8080'
+#    environment:
+#      - KAFKA_BROKERS=broker1:9012,broker2:9022,broker3:9032
+#      - TZ=Europe/Moscow
+#    restart: always
+#    depends_on:
+#      - broker1
+#      - broker2
+#      - broker3

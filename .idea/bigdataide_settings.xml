@@ -4,6 +4,7 @@
     <option name="connections">
       <list>
         <ExtendedConnectionData>
+          <option name="enabled" value="false" />
           <option name="extended">
             <map>
               <entry key="brokerCloudSource" value="rO0ABX5yADNjb20uamV0YnJhaW5zLmJpZ2RhdGF0b29scy5rYWZrYS5yZnMuS2Fma2FDbG91ZFR5cGUAAAAAAAAAABIAAHhyAA5qYXZhLmxhbmcuRW51bQAAAAAAAAAAEgAAeHB0AAlDT05GTFVFTlQ=" />

@@ -62,7 +62,7 @@ create or replace table draft.keys
 ) engine = Log;
 
 --=== CI ====
-drop table draft.mv_to_stage_from_ci;
+drop table if exists draft.mv_to_stage_from_ci;
 create materialized view draft.mv_to_stage_from_ci to draft.stage as
 select
     cityHash64(ci_id, 'ci') as key_id
@@ -73,7 +73,7 @@ select
     , 'ci' as source
 from draft.null_ci;
 
-drop table draft.mv_to_keys_from_ci;
+drop table if exists draft.mv_to_keys_from_ci;
 create materialized view draft.mv_to_keys_from_ci to draft.keys as
 select
     (arrayJoin(is_del = 1 ? [(h1, h2)] : [(cityHash64(key, 'ci') as h1, cityHash64(rel_key, 'ch') as h2), (h2, h1)]) as tup).1 as key_id
@@ -88,7 +88,7 @@ from
 );
 
 --=== CH ====
-drop table draft.mv_to_stage_from_ch;
+drop table if exists draft.mv_to_stage_from_ch;
 create materialized view draft.mv_to_stage_from_ch to draft.stage as
 select
     cityHash64(ch_id, 'ch') as key_id
@@ -98,7 +98,7 @@ select
     , 'ch' as source
 from draft.null_ch;
 
-drop table draft.mv_to_keys_from_ch;
+drop table if exists draft.mv_to_keys_from_ch;
 create materialized view draft.mv_to_keys_from_ch to draft.keys as
 select
     cityHash64(ch_id, 'ch') as key_id
@@ -106,7 +106,7 @@ select
 from draft.null_ch;
 
 --=== BI ====
-drop table draft.mv_to_stage_from_bi;
+drop table if exists draft.mv_to_stage_from_bi;
 create materialized view draft.mv_to_stage_from_bi to draft.stage as
 select
     cityHash64(bo_id, 'bi') as key_id
@@ -121,7 +121,7 @@ where is_del = 1 or (is_del = 0 and ci_id <> 0);
 
 
 --=== BH ====
-drop table draft.mv_to_stage_from_bh;
+drop table if exists draft.mv_to_stage_from_bh;
 create materialized view draft.mv_to_stage_from_bh to draft.stage as
 select
     cityHash64(bo_id, 'bh') as key_id
@@ -133,7 +133,7 @@ select
 from draft.null_bo
 where is_del = 1 or (is_del = 0 and ci_id = 0);
 
-drop table draft.mv_to_keys_from_bo;
+drop table if exists draft.mv_to_keys_from_bo;
 create materialized view draft.mv_to_keys_from_bo to draft.keys as
 select
     (arrayJoin([
@@ -157,7 +157,7 @@ from draft.null_bo;
 
 
 --=== EI ====
-drop table draft.mv_to_stage_from_ei;
+drop table if exists draft.mv_to_stage_from_ei;
 create materialized view draft.mv_to_stage_from_ei to draft.stage as
 select
     cityHash64(ea_id, 'ei') as key_id
@@ -165,12 +165,12 @@ select
     , ci_id
     , ea_id as ei_id
     , is_del
-    , ea_val as ei_value
+    , value as ei_value
     , 'ei' as source
 from draft.null_ea
 where is_del = 1 or (is_del = 0 and ci_id <> 0) ;
 
-drop table draft.mv_to_keys_from_ea;
+drop table if exists draft.mv_to_keys_from_ea;
 create materialized view draft.mv_to_keys_from_ea to draft.keys as
 select
     (arrayJoin([
@@ -193,14 +193,14 @@ from draft.null_ea;
 
 
 --=== EH ====
-drop table draft.mv_to_stage_from_eh;
+drop table if exists draft.mv_to_stage_from_eh;
 create materialized view draft.mv_to_stage_from_eh to draft.stage as
 select
     cityHash64(ea_id, 'eh') as key_id
     , ch_id
     , ea_id as eh_id
     , is_del
-    , ea_val as eh_value
+    , value as eh_value
     , 'eh' as source
 from draft.null_ea
 where is_del = 1 or (is_del = 0 and ci_id = 0);
@@ -303,7 +303,7 @@ semi left join
 ;
 
 
-
+select * from system.warnings;
 
 
 
